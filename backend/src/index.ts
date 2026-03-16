@@ -1,8 +1,14 @@
 import Fastify from 'fastify'
+import cors from '@fastify/cors'
 import notesRoutes from './routes/note.route'
 import db from './db/schema.js'
 
 const app = Fastify({ logger: true })
+
+
+await app.register(cors, {
+  origin: true
+})
 
 app.register(notesRoutes)
 
