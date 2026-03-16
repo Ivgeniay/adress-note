@@ -35,5 +35,6 @@ jobs:
             cd /app/backend
             npm install
             npm run build
-            pm2 restart address-notes-backend || pm2 start dist/index.js --name address-notes-backend
+            pm2 delete address-notes-backend || true
+            pm2 start dist/index.js --name address-notes-backend --no-color
             pm2 save
