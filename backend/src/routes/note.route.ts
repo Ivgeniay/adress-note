@@ -6,6 +6,17 @@ export default async function notesRoutes(app: FastifyInstance) {
     return notesService.getAll()
   })
 
+  app.get<{ Querystring: { lat: string; lng: string; radius: string } }>(
+    '/notes/nearby',
+    async (request, reply) => {
+      const { lat, lng, radius } = request.query
+      if (!lat || !lng || !radius) {
+        return reply.status(400).send({ error: 'lat, lng and radius are required' })
+      }
+      return notesService.getNearby(parseFloat(lat), parseFloat(lng), parseFloat(radius))
+    }
+  )
+
   app.get<{ Params: { address: string; building: string; entrance: string } }>(
     '/notes/:address/:building/:entrance',
     async (request, reply) => {

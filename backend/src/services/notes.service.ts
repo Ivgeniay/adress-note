@@ -18,6 +18,22 @@ const getOne = (address: string, building: string, entrance: string): Note | und
     .get(address, building, entrance) as Note | undefined
 }
 
+const getNearby = (lat: number, lng: number, radius: number): Note[] => {
+  const latDelta = radius / 111320
+  const lngDelta = radius / (111320 * Math.cos(lat * Math.PI / 180))
+
+  return db.prepare(`
+    SELECT * FROM notes
+    WHERE lat BETWEEN ? AND ?
+    AND lng BETWEEN ? AND ?
+  `).all(
+    lat - latDelta,
+    lat + latDelta,
+    lng - lngDelta,
+    lng + lngDelta
+  ) as Note[]
+}
+
 const create = (data: Note): void => {
   db.prepare('INSERT INTO notes (address, building, entrance, note, lat, lng) VALUES (?, ?, ?, ?, ?, ?)')
     .run(data.address, data.building, data.entrance, data.note, data.lat, data.lng)
@@ -33,4 +49,4 @@ const remove = (address: string, building: string, entrance: string): void => {
     .run(address, building, entrance)
 }
 
-export default { getAll, getOne, create, update, remove }
+export default { getAll, getOne, getNearby, create, update, remove }

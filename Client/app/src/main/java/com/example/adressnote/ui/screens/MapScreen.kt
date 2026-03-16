@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MyLocation
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
@@ -24,8 +25,10 @@ import com.example.adressnote.map.interaction.MapTapHandler
 import com.example.adressnote.map.location.UserLocationManager
 import com.example.adressnote.network.GeocoderService
 import com.example.adressnote.network.NotesApiService
+import com.example.adressnote.settings.SettingsManager
 import com.yandex.mapkit.MapKitFactory
 import com.yandex.mapkit.mapview.MapView
+import androidx.compose.foundation.layout.Column
 
 data class SelectedEntrance(
     val address: String,
@@ -44,8 +47,10 @@ fun MapScreen() {
     val userLocationManager = remember { UserLocationManager(context, mapView) }
     val geocoderService = remember { GeocoderService(BuildConfig.GEOCODER_API_KEY) }
     val apiService = remember { NotesApiService(BuildConfig.BACKEND_URL) }
+    val settingsManager = remember { SettingsManager(context) }
 
     var selectedEntrance by remember { mutableStateOf<SelectedEntrance?>(null) }
+    var showSettings by remember { mutableStateOf(false) }
 
     val mapTapHandler = remember {
         MapTapHandler(
@@ -75,16 +80,28 @@ fun MapScreen() {
             factory = { mapView },
             modifier = Modifier.fillMaxSize()
         )
-        FloatingActionButton(
-            onClick = { userLocationManager.moveToUserLocation() },
+        Column(
             modifier = Modifier
                 .align(Alignment.BottomEnd)
                 .padding(16.dp)
         ) {
-            Icon(
-                imageVector = Icons.Filled.MyLocation,
-                contentDescription = "Моя локация"
-            )
+            FloatingActionButton(
+                onClick = { showSettings = true },
+                modifier = Modifier.padding(bottom = 8.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.Settings,
+                    contentDescription = "Настройки"
+                )
+            }
+            FloatingActionButton(
+                onClick = { userLocationManager.moveToUserLocation() }
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.MyLocation,
+                    contentDescription = "Моя локация"
+                )
+            }
         }
     }
 
@@ -101,6 +118,13 @@ fun MapScreen() {
                 selectedEntrance = null
                 mapView.mapWindow.map.deselectGeoObject()
             }
+        )
+    }
+
+    if (showSettings) {
+        SettingsBottomSheet(
+            settingsManager = settingsManager,
+            onDismiss = { showSettings = false }
         )
     }
 }
