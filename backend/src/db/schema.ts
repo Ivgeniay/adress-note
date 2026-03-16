@@ -10,6 +10,8 @@ db.exec(`
     building TEXT NOT NULL,
     entrance TEXT NOT NULL,
     note     TEXT NOT NULL,
+    lat      REAL NOT NULL,
+    lng      REAL NOT NULL,
     PRIMARY KEY (address, building, entrance)
   )
 `)

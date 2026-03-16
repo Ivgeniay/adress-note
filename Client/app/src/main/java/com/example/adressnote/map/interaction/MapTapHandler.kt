@@ -2,7 +2,6 @@ package com.example.adressnote.map.interaction
 
 import android.util.Log
 import com.example.adressnote.network.GeocoderService
-import com.yandex.mapkit.GeoObject
 import com.yandex.mapkit.layers.GeoObjectTapEvent
 import com.yandex.mapkit.layers.GeoObjectTapListener
 import com.yandex.mapkit.map.Map
@@ -14,7 +13,7 @@ class MapTapHandler(
     private val map: Map,
     private val geocoderService: GeocoderService,
     private val scope: CoroutineScope,
-    private val onEntranceTapped: (address: String, building: String, entrance: String) -> Unit
+    private val onEntranceTapped: (address: String, building: String, entrance: String, lat: Double, lng: Double) -> Unit
 ) : GeoObjectTapListener {
 
     init {
@@ -56,7 +55,7 @@ class MapTapHandler(
             Log.d("MapTapHandler", "address: ${result.address}")
             Log.d("MapTapHandler", "building: ${result.building}")
             Log.d("MapTapHandler", "entrance: $entrance")
-            onEntranceTapped(result.address, result.building, entrance)
+            onEntranceTapped(result.address, result.building, entrance, point.latitude, point.longitude)
         }
 
         return true

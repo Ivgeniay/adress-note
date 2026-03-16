@@ -5,6 +5,8 @@ interface Note {
   building: string
   entrance: string
   note: string
+  lat: number
+  lng: number
 }
 
 const getAll = (): Note[] => {
@@ -17,8 +19,8 @@ const getOne = (address: string, building: string, entrance: string): Note | und
 }
 
 const create = (data: Note): void => {
-  db.prepare('INSERT INTO notes (address, building, entrance, note) VALUES (?, ?, ?, ?)')
-    .run(data.address, data.building, data.entrance, data.note)
+  db.prepare('INSERT INTO notes (address, building, entrance, note, lat, lng) VALUES (?, ?, ?, ?, ?, ?)')
+    .run(data.address, data.building, data.entrance, data.note, data.lat, data.lng)
 }
 
 const update = (address: string, building: string, entrance: string, note: string): void => {

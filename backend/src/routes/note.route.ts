@@ -16,7 +16,7 @@ export default async function notesRoutes(app: FastifyInstance) {
     }
   )
 
-  app.post<{ Body: { address: string; building: string; entrance: string; note: string } }>(
+  app.post<{ Body: { address: string; building: string; entrance: string; note: string; lat: number; lng: number } }>(
     '/notes',
     async (request, reply) => {
       notesService.create(request.body)

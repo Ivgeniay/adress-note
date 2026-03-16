@@ -3,14 +3,17 @@ package com.example.adressnote.ui.screens
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.Icon
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MyLocation
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -20,8 +23,18 @@ import com.example.adressnote.BuildConfig
 import com.example.adressnote.map.interaction.MapTapHandler
 import com.example.adressnote.map.location.UserLocationManager
 import com.example.adressnote.network.GeocoderService
+import com.example.adressnote.network.NotesApiService
 import com.yandex.mapkit.MapKitFactory
 import com.yandex.mapkit.mapview.MapView
+
+data class SelectedEntrance(
+    val address: String,
+    val building: String,
+    val entrance: String,
+    val lat: Double,
+    val lng: Double,
+    val openedAt: Long = System.currentTimeMillis()
+)
 
 @Composable
 fun MapScreen() {
@@ -30,13 +43,17 @@ fun MapScreen() {
     val mapView = remember { MapView(context) }
     val userLocationManager = remember { UserLocationManager(context, mapView) }
     val geocoderService = remember { GeocoderService(BuildConfig.GEOCODER_API_KEY) }
+    val apiService = remember { NotesApiService(BuildConfig.BACKEND_URL) }
+
+    var selectedEntrance by remember { mutableStateOf<SelectedEntrance?>(null) }
+
     val mapTapHandler = remember {
         MapTapHandler(
             map = mapView.mapWindow.map,
             geocoderService = geocoderService,
             scope = scope,
-            onEntranceTapped = { address, building, entrance ->
-                // TODO: навигация на экран заметки
+            onEntranceTapped = { address, building, entrance, lat, lng ->
+                selectedEntrance = SelectedEntrance(address, building, entrance, lat, lng)
             }
         )
     }
@@ -69,5 +86,21 @@ fun MapScreen() {
                 contentDescription = "Моя локация"
             )
         }
+    }
+
+    selectedEntrance?.let { entrance ->
+        NoteBottomSheet(
+            address = entrance.address,
+            building = entrance.building,
+            entrance = entrance.entrance,
+            lat = entrance.lat,
+            lng = entrance.lng,
+            openedAt = entrance.openedAt,
+            apiService = apiService,
+            onDismiss = {
+                selectedEntrance = null
+                mapView.mapWindow.map.deselectGeoObject()
+            }
+        )
     }
 }

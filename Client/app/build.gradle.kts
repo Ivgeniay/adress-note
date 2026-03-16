@@ -18,6 +18,7 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         buildConfigField("String", "MAPKIT_API_KEY", "\"${project.findProperty("MAPKIT_API_KEY") ?: ""}\"")
         buildConfigField("String", "GEOCODER_API_KEY", "\"${project.findProperty("GEOCODER_API_KEY") ?: ""}\"")
+        buildConfigField("String", "BACKEND_URL", "\"${project.findProperty("BACKEND_URL") ?: ""}\"")
     }
 
     buildTypes {
