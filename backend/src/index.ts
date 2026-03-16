@@ -1,18 +1,18 @@
 import Fastify from 'fastify'
 import cors from '@fastify/cors'
-import notesRoutes from './routes/note.route'
 import db from './db/schema.js'
+import notesRoutes from './routes/note.route.js'
 
 const app = Fastify({ logger: true })
 
 
-await app.register(cors, {
-  origin: true
-})
-
-app.register(notesRoutes)
-
 const start = async () => {
+  await app.register(cors, {
+    origin: true
+  })
+
+  app.register(notesRoutes)
+
   try {
     const tableExists = db.prepare(
       "SELECT name FROM sqlite_master WHERE type='table' AND name='notes'"
