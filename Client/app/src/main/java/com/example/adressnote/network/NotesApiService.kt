@@ -89,6 +89,47 @@ class NotesApiService(private val baseUrl: String) {
         }
     }
 
+    suspend fun getNearby(lat: Double, lng: Double, radius: Double): List<Note> {
+        return withContext(Dispatchers.IO) {
+            try {
+                val url = URL("$baseUrl/notes/nearby?lat=$lat&lng=$lng&radius=$radius")
+                Log.d("NotesApiService", "getNearby URL: $url")
+                val connection = url.openConnection() as HttpURLConnection
+                connection.requestMethod = "GET"
+                connection.connectTimeout = 5000
+                connection.readTimeout = 5000
+
+                val responseCode = connection.responseCode
+                Log.d("NotesApiService", "getNearby responseCode: $responseCode")
+
+                if (responseCode != 200) return@withContext emptyList()
+
+                val response = connection.inputStream.bufferedReader().readText()
+                Log.d("NotesApiService", "getNearby response: $response")
+
+                val jsonArray = org.json.JSONArray(response)
+                val notes = mutableListOf<Note>()
+                for (i in 0 until jsonArray.length()) {
+                    val json = jsonArray.getJSONObject(i)
+                    notes.add(
+                        Note(
+                            address = json.getString("address"),
+                            building = json.getString("building"),
+                            entrance = json.getString("entrance"),
+                            note = json.getString("note"),
+                            lat = json.getDouble("lat"),
+                            lng = json.getDouble("lng")
+                        )
+                    )
+                }
+                notes
+            } catch (e: Exception) {
+                Log.e("NotesApiService", "getNearby error: ${e.message}", e)
+                emptyList()
+            }
+        }
+    }
+
     suspend fun saveNote(note: Note): Boolean {
         return withContext(Dispatchers.IO) {
             try {

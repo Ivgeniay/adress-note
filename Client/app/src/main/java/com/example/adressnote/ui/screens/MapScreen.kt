@@ -1,6 +1,8 @@
 package com.example.adressnote.ui.screens
 
+import android.content.Intent
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -25,10 +27,10 @@ import com.example.adressnote.map.interaction.MapTapHandler
 import com.example.adressnote.map.location.UserLocationManager
 import com.example.adressnote.network.GeocoderService
 import com.example.adressnote.network.NotesApiService
+import com.example.adressnote.service.LocationTrackingService
 import com.example.adressnote.settings.SettingsManager
 import com.yandex.mapkit.MapKitFactory
 import com.yandex.mapkit.mapview.MapView
-import androidx.compose.foundation.layout.Column
 
 data class SelectedEntrance(
     val address: String,
@@ -68,8 +70,16 @@ fun MapScreen() {
         MapKitFactory.getInstance().onStart()
         userLocationManager.init()
         userLocationManager.moveToUserLocation()
+
+        if (settingsManager.trackingEnabled) {
+            context.startForegroundService(
+                Intent(context, LocationTrackingService::class.java)
+            )
+        }
+
         onDispose {
             mapTapHandler.release()
+            userLocationManager.release()
             mapView.onStop()
             MapKitFactory.getInstance().onStop()
         }
@@ -124,7 +134,10 @@ fun MapScreen() {
     if (showSettings) {
         SettingsBottomSheet(
             settingsManager = settingsManager,
-            onDismiss = { showSettings = false }
+            onDismiss = {
+                showSettings = false
+                userLocationManager.updateRadius()
+            }
         )
     }
 }
